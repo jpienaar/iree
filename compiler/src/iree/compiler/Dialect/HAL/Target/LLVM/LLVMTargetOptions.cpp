@@ -9,6 +9,7 @@
 #include <mutex>
 
 #include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Triple.h"
 #include "llvm/MC/SubtargetFeature.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -28,9 +29,22 @@ LLVMTargetOptions getDefaultLLVMTargetOptions() {
     // Host target triple.
     targetOptions.target.triple = llvm::sys::getProcessTriple();
     targetOptions.target.cpu = llvm::sys::getHostCPUName().str();
-    fprintf(stderr, ">>TT %s\n", llvm::sys::getDefaultTargetTriple().c_str());
+    fprintf(stderr, ">>TT %s\n", targetOptions.target.triple.c_str());
     fprintf(stderr, ">>TC %s\n", targetOptions.target.cpu.c_str());
     fprintf(stderr, ">>PT %s\n", llvm::sys::getProcessTriple().c_str());
+    if (targetOptions.target == apple-m1) {
+      StringRef str(targetOptions.target.triple);
+ #ifdef __arm__
+      if (str.consume_front("x86_64")) {
+        targetOptions.target.triple = ("aarch64" + str).str();
+      }
+ #else
+      if (str.consume_front("aarch64")) {
+        targetOptions.target.triple = ("x86_64" + str).str();
+      }
+ #endif
+    }
+    fprintf(stderr, ">>TT %s\n", targetOptions.target.triple.c_str());
     {
       llvm::SubtargetFeatures features;
       llvm::StringMap<bool> hostFeatures;
