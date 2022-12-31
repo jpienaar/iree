@@ -34,7 +34,7 @@ LLVMTargetOptions getDefaultLLVMTargetOptions() {
     fprintf(stderr, ">>PT %s\n", llvm::sys::getProcessTriple().c_str());
     if (targetOptions.target == apple-m1) {
       StringRef str(targetOptions.target.triple);
- #ifdef __arm__
+ #ifdef __arm64__
       if (str.consume_front("x86_64")) {
         targetOptions.target.triple = ("aarch64" + str).str();
       }
